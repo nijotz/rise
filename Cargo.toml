@@ -11,6 +11,10 @@ path = "src/bin/viewer.rs"
 name = "server"
 path = "src/bin/server.rs"
 
+[lib]
+name = "rise"
+path = "src/rise.rs"
+
 [dependencies]
 nalgebra = "0.6.0"
 piston = "0.17.0"

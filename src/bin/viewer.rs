@@ -1,33 +1,29 @@
-const TICKS: f64 = 25f64;
-// MilliSeconds Per Tick
-const SPT: f64 = 1f64 / TICKS;
+extern crate piston;
+extern crate graphics;
+extern crate glutin_window;
+extern crate opengl_graphics;
 
+use piston::window::WindowSettings;
+use piston::event_loop::*;
+use piston::input::*;
+use glutin_window::GlutinWindow as Window;
+use opengl_graphics::{ GlGraphics, OpenGL };
+
+// Vector maths
 extern crate nalgebra as na;
 extern crate time;
 use na::{Vec2};
 
-struct Actor {
-    position: Vec2<f64>,
-    velocity: Vec2<f64>,
-    acceleration: Vec2<f64>
+// Simulator
+extern crate rise;
+use rise::World;
+use rise::Actor;
+
+trait Draw {
+    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) -> ();
 }
 
-impl Actor {
-    fn new() -> Actor {
-        let p: Vec2<f64> = Vec2::new(0f64, 0f64);
-        let v: Vec2<f64> = Vec2::new(0f64, 0f64);
-        let a: Vec2<f64> = Vec2::new(1f64, 1f64);
-        Actor {
-            position: p,
-            velocity: v,
-            acceleration: a
-        }
-    }
-
-    fn push(&mut self, force: Vec2<f64>) {
-        self.acceleration = self.acceleration + force;
-    }
-
+impl Draw for Actor {
     fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) {
         use graphics::*;
         let square = rectangle::square(0.0, 0.0, 10.0);
@@ -40,46 +36,19 @@ impl Actor {
             rectangle(RED, square, transform, gl)
         })
     }
-
-    fn update(&mut self) {
-        self.velocity = self.velocity + self.acceleration * SPT;
-        self.position = self.position + self.velocity * SPT;
-    }
 }
 
-extern crate piston;
-extern crate graphics;
-extern crate glutin_window;
-extern crate opengl_graphics;
-
-use piston::window::WindowSettings;
-use piston::event_loop::*;
-use piston::input::*;
-use glutin_window::GlutinWindow as Window;
-use opengl_graphics::{ GlGraphics, OpenGL };
-
-pub struct World {
-    gl: GlGraphics,
-    actors: Vec<Actor>
-}
-
-impl World {
-    fn render(&mut self, args: &RenderArgs) {
+impl Draw for World {
+    fn render(&self, mut gl: &mut GlGraphics, args: &RenderArgs) {
         use graphics::*;
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-        self.gl.draw(args.viewport(), |_c, gl| {
+        gl.draw(args.viewport(), |_c, gl| {
             // Clear the screen.
             clear(BLACK, gl);
         });
 
         for actor in &self.actors {
-            actor.render(&mut self.gl, args);
-        }
-    }
-
-    fn update(&mut self) {
-        for actor in self.actors.iter_mut() {
-            actor.update();
+            actor.render(&mut gl, args);
         }
     }
 }
@@ -97,11 +66,9 @@ fn main() {
         .exit_on_esc(true)
         .build()
         .unwrap();
+    let mut gl: GlGraphics = GlGraphics::new(opengl);
 
-    let mut world = World {
-        gl: GlGraphics::new(opengl),
-        actors: Vec::new()
-    };
+    let mut world = World { actors: Vec::new() };
 
     let mut events = window.events();
     while let Some(e) = events.next(&mut window) {
@@ -112,7 +79,7 @@ fn main() {
         }
 
         if let Some(r) = e.render_args() {
-            world.render(&r);
+            world.render(&mut gl, &r);
         }
 
         if let Some(_u) = e.update_args() {
