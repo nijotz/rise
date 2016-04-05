@@ -41,7 +41,7 @@ impl Actor {
         })
     }
 
-    fn update(&mut self, args: &UpdateArgs) {
+    fn update(&mut self) {
         self.velocity = self.velocity + self.acceleration * SPT;
         self.position = self.position + self.velocity * SPT;
     }
@@ -67,7 +67,7 @@ impl World {
     fn render(&mut self, args: &RenderArgs) {
         use graphics::*;
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-        self.gl.draw(args.viewport(), |c, gl| {
+        self.gl.draw(args.viewport(), |_c, gl| {
             // Clear the screen.
             clear(BLACK, gl);
         });
@@ -77,9 +77,9 @@ impl World {
         }
     }
 
-    fn update(&mut self, args: &UpdateArgs) {
+    fn update(&mut self) {
         for actor in self.actors.iter_mut() {
-            actor.update(args);
+            actor.update();
         }
     }
 }
@@ -105,16 +105,18 @@ fn main() {
 
     let mut events = window.events();
     while let Some(e) = events.next(&mut window) {
-        if let Some(button) = e.press_args() {
-            world.actors.push(Actor::new());
+        if let Some(_button) = e.press_args() {
+            let mut actor = Actor::new();
+            actor.push(Vec2::new(1.0, 1.0));
+            world.actors.push(actor);
         }
 
         if let Some(r) = e.render_args() {
             world.render(&r);
         }
 
-        if let Some(u) = e.update_args() {
-            world.update(&u);
+        if let Some(_u) = e.update_args() {
+            world.update();
         }
     }
 }
