@@ -1,12 +1,9 @@
-const TICKS: i32 = 25;
+const TICKS: f64 = 25f64;
 // MilliSeconds Per Tick
-const SPT: f64 = 1f64 / 25f64;
+const SPT: f64 = 1f64 / TICKS;
 
 extern crate nalgebra as na;
 extern crate time;
-use std::time::Duration;
-use std::mem;
-use std::thread;
 use na::{Vec2};
 
 struct Actor {
@@ -15,14 +12,7 @@ struct Actor {
     acceleration: Vec2<f64>
 }
 
-trait Movable {
-    fn new() -> Self;
-    fn push(&mut self, force: Vec2<f64>) -> ();
-    fn draw(&self) -> ();
-    fn update(&mut self) -> ();
-}
-
-impl Movable for Actor {
+impl Actor {
     fn new() -> Actor {
         let p: Vec2<f64> = Vec2::new(0f64, 0f64);
         let v: Vec2<f64> = Vec2::new(0f64, 0f64);
@@ -48,29 +38,62 @@ impl Movable for Actor {
     }
 }
 
-fn timestamp () -> f64 {
-    let timespec = time::get_time();
-    let seconds: f64 = timespec.sec as f64 + (timespec.nsec as f64 / 1000.0 / 1000.0 / 1000.0 );
-    seconds
+extern crate piston;
+extern crate graphics;
+extern crate glutin_window;
+extern crate opengl_graphics;
+
+use piston::window::WindowSettings;
+use piston::event_loop::*;
+use piston::input::*;
+use glutin_window::GlutinWindow as Window;
+use opengl_graphics::{ GlGraphics, OpenGL };
+
+pub struct World {
+    gl: GlGraphics,
+    //actors: Vec<Actor>
 }
 
-fn update(actor: &mut Actor) {
-    actor.update();
-    actor.draw();
+impl World {
+    fn render(&mut self, args: &RenderArgs) {
+        use graphics::*;
+        const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+        self.gl.draw(args.viewport(), |c, gl| {
+            // Clear the screen.
+            clear(BLACK, gl);
+        })
+    }
+
+    fn update(&mut self, args: &UpdateArgs) {
+    }
 }
 
 fn main() {
-    let mut actor: Actor = Actor::new();
-    actor.acceleration = Vec2::new(1.0, 1.0);
-    let mut next_tick = timestamp();
-    let running = true;
-    while running {
-        if timestamp() > next_tick {
-            update(&mut actor);
-            next_tick += SPT;
-        } else {
-            let millis: u64 = ((next_tick - timestamp()) * 1000f64).floor() as u64;
-            thread::sleep(Duration::from_millis(millis));
+    // Change this to OpenGL::V2_1 if not working.
+    let opengl = OpenGL::V3_2;
+
+    // Create an Glutin window.
+    let mut window: Window = WindowSettings::new(
+            "RISE",
+            [200, 200]
+        )
+        .opengl(opengl)
+        .exit_on_esc(true)
+        .build()
+        .unwrap();
+
+    let mut world = World {
+        gl: GlGraphics::new(opengl)
+    };
+
+    let mut events = window.events();
+    while let Some(e) = events.next(&mut window) {
+        if let Some(r) = e.render_args() {
+            world.render(&r);
+        }
+
+        if let Some(u) = e.update_args() {
+            world.update(&u);
         }
     }
 }
