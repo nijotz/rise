@@ -4,8 +4,12 @@ version = "0.1.0"
 authors = ["Nick Tzaperas <nick@nijotz.com>"]
 
 [[bin]]
-name = "rise"
-#path = "src/other.rs"
+name = "viewer"
+path = "src/bin/viewer.rs"
+
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"
 
 [dependencies]
 nalgebra = "0.6.0"

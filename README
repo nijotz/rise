@@ -1,0 +1,3 @@
+brew install rust
+cargo run --bin viewer
+cargo run --bin server
