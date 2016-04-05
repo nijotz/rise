@@ -30,7 +30,7 @@ impl Actor {
 
     fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) {
         use graphics::*;
-        let square = rectangle::square(0.0, 0.0, 50.0);
+        let square = rectangle::square(0.0, 0.0, 10.0);
         const RED:   [f32; 4] = [1.0, 0.0, 0.0, 1.0];
         let rotation = 0.0;
         gl.draw(args.viewport(), |c, gl| {
