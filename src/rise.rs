@@ -1,3 +1,5 @@
+mod neat;
+
 extern crate nalgebra as na;
 extern crate time;
 use na::{Vec2};
@@ -6,11 +8,11 @@ pub const TICKS: f64 = 25f64;
 // MilliSeconds Per Tick
 pub const SPT: f64 = 1f64 / TICKS;
 
-
 pub struct Actor {
     pub position: Vec2<f64>,
     pub velocity: Vec2<f64>,
-    pub acceleration: Vec2<f64>
+    pub acceleration: Vec2<f64>,
+    genome: neat::Genome
 }
 
 impl Actor {
@@ -21,7 +23,8 @@ impl Actor {
         Actor {
             position: p,
             velocity: v,
-            acceleration: a
+            acceleration: a,
+            genome: neat::Genome::new()
         }
     }
 
@@ -46,4 +49,3 @@ impl World {
         }
     }
 }
-
