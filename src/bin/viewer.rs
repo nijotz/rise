@@ -68,7 +68,7 @@ fn main() {
         .unwrap();
     let mut gl: GlGraphics = GlGraphics::new(opengl);
 
-    let mut world = World { actors: Vec::new() };
+    let mut world = World::new();
 
     let mut events = window.events();
     while let Some(e) = events.next(&mut window) {

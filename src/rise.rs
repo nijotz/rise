@@ -24,7 +24,7 @@ impl Actor {
             position: p,
             velocity: v,
             acceleration: a,
-            genome: neat::Genome::new()
+            genome: neat::Genome::new(Vec::new(), 10, 10)
         }
     }
 
@@ -39,10 +39,18 @@ impl Actor {
 }
 
 pub struct World {
-    pub actors: Vec<Actor>
+    pub actors: Vec<Actor>,
+    subspace: Vec<Vec<Actor>>
 }
 
 impl World {
+    pub fn new() -> World {
+        World {
+            actors: Vec::new(),
+            subspace: (0..100).map(|_| Vec::new()).collect()
+        }
+    }
+
     pub fn update(&mut self) {
         for actor in self.actors.iter_mut() {
             actor.update();
