@@ -71,12 +71,12 @@ impl Neuron {
         }
     }
 
-    fn calculated_inputs(&self, calc_neurons: &HashMap<u64, CalcNeuron>) -> Vec<u64> {
+    fn uncalculated_inputs(&self, calc_neurons: &HashMap<u64, CalcNeuron>) -> Vec<u64> {
         let mut clone = self.incoming.clone();
         clone.retain(
             |&n|
             if let Some(x) = calc_neurons.get(&n) {
-                return x.calculated;
+                return !x.calculated;
             } else {
                 panic!("BRAIN DAMAGE: Missing neuron");
             }
@@ -153,7 +153,7 @@ impl Network {
         // Traverse network for outputs inward
         while let Some(node) = need.pop() {
             if let Some(neuron) = self.neurons.get(&node) {
-                if neuron.calculated_inputs(&calc_neurons).len() == 0 {
+                if neuron.uncalculated_inputs(&calc_neurons).len() == 0 {
                     let zip_iter = neuron.incoming.iter().zip(neuron.weights.iter());
                     let sum = zip_iter.fold(0f64, |sum, (&incoming, &weight)|
                         if let Some(in_neuron) = calc_neurons.get_mut(&incoming) {
@@ -169,7 +169,8 @@ impl Network {
                     }
                 } else {
                     need.push(node);
-                    for x in neuron.calculated_inputs(&calc_neurons) {
+                    let in_needs = neuron.uncalculated_inputs(&calc_neurons);
+                    for x in in_needs {
                         // prevents circular dependencies causing an infinite loop
                         if !need.iter().any(|i| x == *i) {
                             need.push(x);
