@@ -208,7 +208,7 @@ impl Network {
         // Get output values
         let mut outputs: Vec<f64> = Vec::new();
         for i in 0..self.num_outputs {
-            outputs[i as usize] = calc_neurons[&(i + self.num_inputs)].value;
+            outputs.push(calc_neurons[&(i + self.num_inputs)].value);
         }
 
         debug!("Calculated output: {:?}", outputs);
