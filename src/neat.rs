@@ -156,9 +156,9 @@ impl Network {
         for (i, &input) in inputs.iter().enumerate() {
             if let Some(x) = calc_neurons.get_mut(&(i as u64)) {
                 x.value = input;
+                x.calculated = true;
             }
         }
-
 
         // Initialize traversal data with output nodes
         let mut need: Vec<u64> = Vec::new();
