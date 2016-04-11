@@ -28,14 +28,23 @@ pub struct Genome {
 
 impl Genome {
     pub fn new(genes: Vec<Gene>, num_inputs: u64, num_outputs: u64) -> Genome {
-        let network = Network::new(&genes, num_inputs, num_outputs);
-        return Genome {
+        let empty_network = Network {
+            neurons: HashMap::new(),
+            num_inputs: 0,
+            num_outputs: 0
+        };
+
+        let mut genome = Genome {
             genes: genes,
-            network: network,
+            network: empty_network,
             fitness: 0.0,
             num_inputs: num_inputs,
             num_outputs: num_outputs,
-        }
+        };
+
+        let network = Network::new(&genome);
+        genome.network = network;
+        return genome;
     }
 }
 
@@ -83,21 +92,22 @@ pub struct Network {
 }
 
 impl Network {
-    pub fn new(genes: &Vec<Gene>, num_inputs: u64, num_outputs: u64) -> Network {
+    pub fn new(genome: &Genome) -> Network {
         let mut neurons: HashMap<u64, Neuron> = HashMap::new();
 
         // Add inputs and outputs to network
-        for i in 0..num_inputs {
+        for i in 0..genome.num_inputs {
             neurons.insert(i, Neuron::new());
         }
 
-        for i in num_inputs..(num_inputs + num_outputs) {
+        for i in genome.num_inputs..(genome.num_inputs + genome.num_outputs) {
             neurons.insert(i, Neuron::new());
         }
 
         // Use genes to build hidden layer
-        for gene in genes {
+        for gene in genome.genes.iter() {
             if !gene.enabled { continue; }
+
             if !neurons.contains_key(&gene.out) {
                 neurons.insert(gene.out, Neuron::new());
             }
