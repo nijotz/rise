@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::f64::consts::E;
+use std::fmt;
+
 
 pub struct Gene {
     pub into: u64,
@@ -7,6 +9,13 @@ pub struct Gene {
     pub weight: f64,
     pub enabled: bool,
     //TODO: historical_marker: u64
+}
+
+impl fmt::Debug for Gene {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Gene: {{ into: {}, out: {}, weight: {} }}",
+               self.into, self.out, self.weight)
+    }
 }
 
 pub struct Genome {
