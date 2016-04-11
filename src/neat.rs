@@ -54,7 +54,7 @@ fn sigmoid(x: f64) -> f64 {
 }
 
 struct Neuron {
-    weight: f64,
+    weights: Vec<f64>,
     incoming: Vec<u64>
 }
 
@@ -66,7 +66,7 @@ struct CalcNeuron {
 impl Neuron {
     fn new() -> Neuron {
         Neuron {
-            weight: 0f64,
+            weights: Vec::new(),
             incoming: Vec::new()
         }
     }
@@ -113,7 +113,10 @@ impl Network {
             }
 
             match neurons.get_mut(&gene.out) {
-                Some(neuron) => neuron.incoming.push(gene.into),
+                Some(neuron) => {
+                    neuron.incoming.push(gene.into);
+                    neuron.weights.push(gene.weight);
+                },
                 _ => { panic!("BRAIN DAMAGE: Missing neuron") }
             }
 
@@ -151,10 +154,18 @@ impl Network {
         while let Some(node) = need.pop() {
             if let Some(neuron) = self.neurons.get(&node) {
                 if neuron.calculated_inputs(&calc_neurons).len() == 0 {
-                    let sum = neuron.incoming.iter().fold(0f64, |sum, x| if let Some(y) = calc_neurons.get_mut(x) { return sum + y.value } else { return sum; }) * neuron.weight;
-                    if let Some(x) = calc_neurons.get_mut(&node) {
-                        x.value = sigmoid(sum);
-                        x.calculated = true;
+                    let zip_iter = neuron.incoming.iter().zip(neuron.weights.iter());
+                    let sum = zip_iter.fold(0f64, |sum, (&incoming, &weight)|
+                        if let Some(in_neuron) = calc_neurons.get_mut(&incoming) {
+                            return sum + (in_neuron.value * weight);
+                        } else {
+                            return sum;
+                        }
+                    );
+
+                    if let Some(calc) = calc_neurons.get_mut(&node) {
+                        calc.value = sigmoid(sum);
+                        calc.calculated = true;
                     }
                 } else {
                     need.push(node);
