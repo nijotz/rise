@@ -1,5 +1,7 @@
 pub mod neat;
 
+#[macro_use]
+extern crate log;
 extern crate nalgebra as na;
 extern crate time;
 use na::{Vec2};
