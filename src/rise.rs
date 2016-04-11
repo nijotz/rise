@@ -1,4 +1,4 @@
-mod neat;
+pub mod neat;
 
 extern crate nalgebra as na;
 extern crate time;

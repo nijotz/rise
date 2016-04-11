@@ -2,17 +2,17 @@ use std::collections::HashMap;
 use std::f64::consts::E;
 
 pub struct Gene {
-    into: u64,
-    out: u64,
-    weight: f64,
-    enabled: bool,
+    pub into: u64,
+    pub out: u64,
+    pub weight: f64,
+    pub enabled: bool,
     //TODO: historical_marker: u64
 }
 
 pub struct Genome {
     genes: Vec<Gene>,
     fitness: f64,
-    network: Network,
+    pub network: Network,
     num_inputs: u64,
     num_outputs: u64,
 }
@@ -35,12 +35,12 @@ fn sigmoid(x: f64) -> f64 {
     2.0 / (1.0 + E.powf(-4.9 * x)) - 1.0
 }
 
-pub struct Neuron {
+struct Neuron {
     weight: f64,
     incoming: Vec<u64>
 }
 
-pub struct CalcNeuron {
+struct CalcNeuron {
     value: f64,
     calculated: bool
 }
