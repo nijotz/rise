@@ -16,6 +16,8 @@ name = "rise"
 path = "src/rise.rs"
 
 [dependencies]
+env_logger = "0.3"
+log = "0.3.6"
 nalgebra = "0.6.0"
 piston = "0.17.0"
 piston2d-graphics = "0.13.0"
