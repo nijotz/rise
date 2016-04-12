@@ -3,6 +3,7 @@ pub mod neat;
 #[macro_use]
 extern crate log;
 extern crate nalgebra as na;
+extern crate rand;
 extern crate time;
 use na::{Vec2};
 
@@ -26,7 +27,7 @@ impl Actor {
             position: p,
             velocity: v,
             acceleration: a,
-            genome: neat::Genome::new(Vec::new(), 10, 10)
+            genome: neat::Genome::random(3, 2)
         }
     }
 

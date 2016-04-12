@@ -1,3 +1,7 @@
+use rand;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Range};
+
 use std::collections::HashMap;
 use std::f64::consts::E;
 use std::fmt;
@@ -7,8 +11,7 @@ pub struct Gene {
     pub into: u64,
     pub out: u64,
     pub weight: f64,
-    pub enabled: bool,
-    //TODO: historical_marker: u64
+    pub enabled: bool
 }
 
 impl fmt::Debug for Gene {
@@ -45,6 +48,25 @@ impl Genome {
         let network = Network::new(&genome);
         genome.network = network;
         return genome;
+    }
+
+    pub fn random(num_inputs: u64, num_outputs: u64) -> Genome {
+        let mut genes = Vec::new();
+        let num_genes = Range::new(1u64, 5u64);
+        let num_neurons = Range::new(1u64, 7u64);
+        let weights = Range::new(0f64, 1f64);
+        let mut rng = rand::thread_rng();
+        for _ in 0..num_genes.ind_sample(&mut rng) {
+            let gene = Gene {
+                into: num_neurons.ind_sample(&mut rng),
+                out: num_neurons.ind_sample(&mut rng),
+                weight: weights.ind_sample(&mut rng),
+                enabled: true
+            };
+            genes.push(gene);
+        }
+
+        return Genome::new(genes, num_inputs, num_outputs);
     }
 }
 
