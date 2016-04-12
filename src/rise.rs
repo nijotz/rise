@@ -5,14 +5,14 @@ extern crate log;
 extern crate nalgebra as na;
 extern crate rand;
 extern crate time;
-use na::{Vec2};
+use na::{Vec2, Pnt2, FloatPnt};
 
 pub const TICKS: f64 = 25f64;
 // MilliSeconds Per Tick
 pub const SPT: f64 = 1f64 / TICKS;
 
 pub struct Actor {
-    pub position: Vec2<f64>,
+    pub position: Pnt2<f64>,
     pub velocity: Vec2<f64>,
     pub acceleration: Vec2<f64>,
     genome: neat::Genome
@@ -20,7 +20,7 @@ pub struct Actor {
 
 impl Actor {
     pub fn new() -> Actor {
-        let p: Vec2<f64> = Vec2::new(320f64, 240f64);
+        let p: Pnt2<f64> = Pnt2::new(320f64, 240f64);
         let v: Vec2<f64> = Vec2::new(0f64, 0f64);
         let a: Vec2<f64> = Vec2::new(0f64, 0f64);
         Actor {
@@ -50,6 +50,8 @@ impl Actor {
         self.acceleration = self.acceleration + jerk * SPT;
         self.velocity = self.velocity + self.acceleration * SPT;
         self.position = self.position + self.velocity * SPT;
+
+        println!("Fitness: {}", fitness(&self))
     }
 }
 
@@ -71,4 +73,8 @@ impl World {
             actor.update();
         }
     }
+}
+
+fn fitness(actor: &Actor) -> f64 {
+    -actor.position.dist(&Pnt2::new(0f64, 0f64))
 }
