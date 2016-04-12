@@ -27,14 +27,14 @@ trait Draw {
 impl Draw for Actor {
     fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) {
         use graphics::*;
-        let square = rectangle::square(0.0, 0.0, 10.0);
+        let shape = rectangle::square(0.0, 0.0, 10.0);
         const RED:   [f32; 4] = [1.0, 0.0, 0.0, 1.0];
         let rotation = 0.0;
         gl.draw(args.viewport(), |c, gl| {
             let transform = c.transform.trans(self.position.x, self.position.y)
                                        .rot_rad(rotation)
                                        .trans(-25.0, -25.0);
-            rectangle(RED, square, transform, gl)
+            ellipse(RED, shape, transform, gl)
         })
     }
 }
