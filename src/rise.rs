@@ -22,12 +22,12 @@ impl Actor {
     pub fn new() -> Actor {
         let p: Vec2<f64> = Vec2::new(0f64, 0f64);
         let v: Vec2<f64> = Vec2::new(0f64, 0f64);
-        let a: Vec2<f64> = Vec2::new(1f64, 1f64);
+        let a: Vec2<f64> = Vec2::new(0f64, 0f64);
         Actor {
             position: p,
             velocity: v,
             acceleration: a,
-            genome: neat::Genome::random(3, 2)
+            genome: neat::Genome::random(6, 2)
         }
     }
 
@@ -36,6 +36,18 @@ impl Actor {
     }
 
     pub fn update(&mut self) {
+        let mut inputs = Vec::new();
+        inputs.push(self.position.x);
+        inputs.push(self.position.y);
+        inputs.push(self.velocity.x);
+        inputs.push(self.velocity.y);
+        inputs.push(self.acceleration.x);
+        inputs.push(self.acceleration.y);
+
+        let outputs = self.genome.network.evaluate(inputs);
+        let jerk = Vec2::new(outputs[0], outputs[1]);
+
+        self.acceleration = self.acceleration + jerk * SPT;
         self.velocity = self.velocity + self.acceleration * SPT;
         self.position = self.position + self.velocity * SPT;
     }
