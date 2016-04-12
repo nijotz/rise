@@ -1,3 +1,4 @@
+extern crate env_logger;
 extern crate piston;
 extern crate graphics;
 extern crate glutin_window;
@@ -54,6 +55,8 @@ impl Draw for World {
 }
 
 fn main() {
+    let _ = env_logger::init();
+
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 
