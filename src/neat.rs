@@ -154,9 +154,9 @@ impl Network {
 
         // Feed inputs into input layer
         for (i, &input) in inputs.iter().enumerate() {
-            if let Some(x) = calc_neurons.get_mut(&(i as u64)) {
-                x.value = input;
-                x.calculated = true;
+            if let Some(input_calc) = calc_neurons.get_mut(&(i as u64)) {
+                input_calc.value = input;
+                input_calc.calculated = true;
             }
         }
 
@@ -192,14 +192,33 @@ impl Network {
                         calc.calculated = true;
                     }
                 } else {
+                    // Re-calculate this one after its inputs have been calculated by pushing it on
+                    // the stack before inputs are pushed on.
                     need.push(node);
+
                     let in_needs = neuron.uncalculated_inputs(&calc_neurons);
                     debug!("Neuron #{} needs inputs: {:?}", node, in_needs);
+                    let mut pushed = false;
+
                     for x in in_needs {
-                        // prevents circular dependencies causing an infinite loop
+                        // If the inputs we need are already on the stack, don't visit them again.
+                        // Prevents circular dependencies causing an infinite loop.
                         if !need.iter().any(|i| x == *i) {
                             need.push(x);
+                            pushed = true;
+                        } else {
+                            debug!("Neuron #{} already needed, not pushing again", x);
                         }
+
+                    }
+
+                    // If dependencies weren't pushed on, don't push this one on and set it to
+                    // calculated to prevent if from being pushed on again.
+                    if !pushed {
+                        if let Some(calc_neuron) = calc_neurons.get_mut(&node) {
+                            calc_neuron.calculated = true;
+                        }
+                        need.pop();
                     }
                 }
             }
