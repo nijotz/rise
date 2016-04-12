@@ -1,5 +1,4 @@
 use rand;
-use rand::Rng;
 use rand::distributions::{IndependentSample, Range};
 
 use std::collections::HashMap;
@@ -54,7 +53,7 @@ impl Genome {
         let mut genes = Vec::new();
         let num_genes = Range::new(1u64, 5u64);
         let num_neurons = Range::new(1u64, 7u64);
-        let weights = Range::new(0f64, 1f64);
+        let weights = Range::new(-1f64, 1f64);
         let mut rng = rand::thread_rng();
         for _ in 0..num_genes.ind_sample(&mut rng) {
             let gene = Gene {
