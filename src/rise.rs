@@ -20,7 +20,7 @@ pub struct Actor {
 
 impl Actor {
     pub fn new() -> Actor {
-        let p: Vec2<f64> = Vec2::new(0f64, 0f64);
+        let p: Vec2<f64> = Vec2::new(320f64, 240f64);
         let v: Vec2<f64> = Vec2::new(0f64, 0f64);
         let a: Vec2<f64> = Vec2::new(0f64, 0f64);
         Actor {
