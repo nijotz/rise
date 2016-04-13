@@ -78,6 +78,20 @@ impl Genome {
         }
     }
 
+    pub fn clone(&self) -> Genome {
+        let clone_genes = (*self).genes.clone();
+        let clone_network = Network::new(&clone_genes, self.num_inputs, self.num_outputs);
+        let clone = Genome {
+            genes: clone_genes,
+            fitness: self.fitness,
+            network: clone_network,
+            num_inputs: self.num_inputs,
+            num_outputs: self.num_outputs,
+            mutation_rates: self.mutation_rates
+        };
+        return clone;
+    }
+
     pub fn random(num_inputs: u64, num_outputs: u64) -> Genome {
         let mut genes = Vec::new();
         let num_genes = Range::new(1u64, 5u64);
