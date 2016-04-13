@@ -1,4 +1,5 @@
 use rand;
+use rand::Rng;
 use rand::distributions::{IndependentSample, Range};
 
 use std::collections::HashMap;
@@ -6,11 +7,13 @@ use std::f64::consts::E;
 use std::fmt;
 
 
+#[derive(Copy, Clone)]
 pub struct Gene {
     pub into: u64,
     pub out: u64,
     pub weight: f64,
-    pub enabled: bool
+    pub enabled: bool,
+    pub innovation: u64
 }
 
 impl fmt::Debug for Gene {
@@ -20,33 +23,59 @@ impl fmt::Debug for Gene {
     }
 }
 
+const MUTATE_CONNECTIONS_CHANCE: f64 = 0.05;
+const MUTATE_LINK_CHANCE: f64 = 0.05;
+const MUTATE_BIAS_CHANCE: f64 = 0.05;
+const MUTATE_NODE_CHANCE: f64 = 0.05;
+const MUTATE_ENABLE_CHANCE: f64 = 0.05;
+const MUTATE_DISABLE_CHANCE: f64 = 0.05;
+const MUTATE_STEP_CHANCE: f64 = 0.05;
+
+#[derive(Copy, Clone)]
+pub struct MutationRates {
+    connections: f64,
+    link: f64,
+    bias: f64,
+    node: f64,
+    enable: f64,
+    disable: f64,
+    step: f64
+}
+
+impl MutationRates {
+    pub fn new() -> MutationRates {
+        MutationRates {
+            connections: MUTATE_CONNECTIONS_CHANCE,
+            link: MUTATE_LINK_CHANCE,
+            bias: MUTATE_BIAS_CHANCE,
+            node: MUTATE_NODE_CHANCE,
+            enable: MUTATE_ENABLE_CHANCE,
+            disable: MUTATE_DISABLE_CHANCE,
+            step: MUTATE_STEP_CHANCE
+        }
+    }
+}
+
 pub struct Genome {
-    genes: Vec<Gene>,
+    pub genes: Vec<Gene>,
     fitness: f64,
     pub network: Network,
     num_inputs: u64,
     num_outputs: u64,
+    mutation_rates: MutationRates,
 }
 
 impl Genome {
     pub fn new(genes: Vec<Gene>, num_inputs: u64, num_outputs: u64) -> Genome {
-        let empty_network = Network {
-            neurons: HashMap::new(),
-            num_inputs: 0,
-            num_outputs: 0
-        };
-
-        let mut genome = Genome {
+        let network = Network::new(&genes, num_inputs, num_outputs);
+        Genome {
             genes: genes,
-            network: empty_network,
+            network: network,
             fitness: 0.0,
             num_inputs: num_inputs,
             num_outputs: num_outputs,
-        };
-
-        let network = Network::new(&genome);
-        genome.network = network;
-        return genome;
+            mutation_rates: MutationRates::new()
+        }
     }
 
     pub fn random(num_inputs: u64, num_outputs: u64) -> Genome {
@@ -55,17 +84,60 @@ impl Genome {
         let num_neurons = Range::new(1u64, 7u64);
         let weights = Range::new(-1f64, 1f64);
         let mut rng = rand::thread_rng();
-        for _ in 0..num_genes.ind_sample(&mut rng) {
+        for i in 0..num_genes.ind_sample(&mut rng) {
             let gene = Gene {
                 into: num_neurons.ind_sample(&mut rng),
                 out: num_neurons.ind_sample(&mut rng),
                 weight: weights.ind_sample(&mut rng),
-                enabled: true
+                enabled: true,
+                innovation: i
             };
             genes.push(gene);
         }
 
         return Genome::new(genes, num_inputs, num_outputs);
+    }
+
+    pub fn breed(&self, genome: &Genome) -> Genome { self.cross(genome) }
+
+    pub fn cross(&self, genome: &Genome) -> Genome {
+        let genome1 = &self;
+        let genome2 = genome;
+        if self.fitness < genome.fitness {
+            let genome2 = &self;
+            let genome1 = genome;
+        }
+
+        // Build innovations hash to match up genes using historical markings
+        let mut innovations: HashMap<u64, Gene> = HashMap::new();
+        for gene in genome.genes.iter() {
+            innovations.insert(gene.innovation, *gene);
+        }
+
+        // Cross genomes
+        let mut child_genes: Vec<Gene> = Vec::new();
+        let mut rng = rand::thread_rng();
+        for gene1 in self.genes.iter() {
+            if let Some(gene2) = innovations.get(&gene1.innovation) {
+                if gene2.enabled && rng.gen() {
+                    child_genes.push(*gene2);
+                    continue;
+                }
+            }
+            child_genes.push(*gene1);
+        }
+
+        let network = Network::new(&child_genes, genome1.num_inputs, genome1.num_outputs);
+        let child = Genome {
+            genes: child_genes,
+            fitness: 0f64,
+            network: network,
+            num_inputs: genome1.num_inputs,
+            num_outputs: genome1.num_outputs,
+            mutation_rates: genome1.mutation_rates
+        };
+
+        return child;
     }
 }
 
@@ -115,22 +187,22 @@ pub struct Network {
 }
 
 impl Network {
-    pub fn new(genome: &Genome) -> Network {
+    pub fn new(genes: &Vec<Gene>, num_inputs: u64, num_outputs: u64) -> Network {
         let mut neurons: HashMap<u64, Neuron> = HashMap::new();
 
         // Add inputs and outputs to network
-        for i in 0..genome.num_inputs {
+        for i in 0..num_inputs {
             debug!("Creating input neuron #{}", i);
             neurons.insert(i, Neuron::new());
         }
 
-        for i in genome.num_inputs..(genome.num_inputs + genome.num_outputs) {
+        for i in num_inputs..(num_inputs + num_outputs) {
             debug!("Creating output neuron #{}", i);
             neurons.insert(i, Neuron::new());
         }
 
         // Use genes to build hidden layer
-        for gene in genome.genes.iter() {
+        for gene in genes.iter() {
             debug!("Processing gene: {:?}", gene);
             if !gene.enabled { continue; }
 
@@ -160,8 +232,8 @@ impl Network {
 
         return Network {
             neurons: neurons,
-            num_inputs: genome.num_inputs,
-            num_outputs: genome.num_outputs
+            num_inputs: num_inputs,
+            num_outputs: num_outputs
         };
     }
 
