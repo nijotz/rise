@@ -23,16 +23,18 @@ impl fmt::Debug for Gene {
     }
 }
 
-const MUTATE_CONNECTIONS_CHANCE: f64 = 0.05;
-const MUTATE_LINK_CHANCE: f64 = 0.05;
-const MUTATE_BIAS_CHANCE: f64 = 0.05;
-const MUTATE_NODE_CHANCE: f64 = 0.05;
-const MUTATE_ENABLE_CHANCE: f64 = 0.05;
-const MUTATE_DISABLE_CHANCE: f64 = 0.05;
-const MUTATE_STEP_CHANCE: f64 = 0.05;
+const MUTATE_CROSSOVER: f64 = 0.75;
+const MUTATE_CONNECTIONS: f64 = 0.05;
+const MUTATE_LINK: f64 = 0.05;
+const MUTATE_BIAS: f64 = 0.05;
+const MUTATE_NODE: f64 = 0.05;
+const MUTATE_ENABLE: f64 = 0.05;
+const MUTATE_DISABLE: f64 = 0.05;
+const MUTATE_STEP: f64 = 0.05;
 
 #[derive(Copy, Clone)]
 pub struct MutationRates {
+    crossover: f64,
     connections: f64,
     link: f64,
     bias: f64,
@@ -45,13 +47,14 @@ pub struct MutationRates {
 impl MutationRates {
     pub fn new() -> MutationRates {
         MutationRates {
-            connections: MUTATE_CONNECTIONS_CHANCE,
-            link: MUTATE_LINK_CHANCE,
-            bias: MUTATE_BIAS_CHANCE,
-            node: MUTATE_NODE_CHANCE,
-            enable: MUTATE_ENABLE_CHANCE,
-            disable: MUTATE_DISABLE_CHANCE,
-            step: MUTATE_STEP_CHANCE
+            crossover: MUTATE_CROSSOVER,
+            connections: MUTATE_CONNECTIONS,
+            link: MUTATE_LINK,
+            bias: MUTATE_BIAS,
+            node: MUTATE_NODE,
+            enable: MUTATE_ENABLE,
+            disable: MUTATE_DISABLE,
+            step: MUTATE_STEP
         }
     }
 }
@@ -112,7 +115,13 @@ impl Genome {
         return Genome::new(genes, num_inputs, num_outputs);
     }
 
-    pub fn breed(&self, genome: &Genome) -> Genome { self.cross(genome) }
+    pub fn breed(&self, genome: &Genome) -> Genome {
+        let mut rng = rand::thread_rng();
+        if Range::new(0f64, 1f64).ind_sample(&mut rng) > self.mutation_rates.crossover {
+            let child = self.cross(genome);
+        }
+        return self.clone();
+    }
 
     pub fn cross(&self, genome: &Genome) -> Genome {
         let genome1 = &self;
@@ -129,8 +138,8 @@ impl Genome {
         }
 
         // Cross genomes
-        let mut child_genes: Vec<Gene> = Vec::new();
         let mut rng = rand::thread_rng();
+        let mut child_genes: Vec<Gene> = Vec::new();
         for gene1 in self.genes.iter() {
             if let Some(gene2) = innovations.get(&gene1.innovation) {
                 if gene2.enabled && rng.gen() {
