@@ -22,39 +22,34 @@ impl fmt::Debug for Gene {
                self.into, self.out, self.weight)
     }
 }
+static mut INNOVATION: u64 = 0;
 
 const MUTATE_CROSSOVER: f64 = 0.75;
-const MUTATE_CONNECTIONS: f64 = 0.05;
+const MUTATE_WEIGHT: f64 = 0.05;
 const MUTATE_LINK: f64 = 0.05;
-const MUTATE_BIAS: f64 = 0.05;
 const MUTATE_NODE: f64 = 0.05;
-const MUTATE_ENABLE: f64 = 0.05;
-const MUTATE_DISABLE: f64 = 0.05;
-const MUTATE_STEP: f64 = 0.05;
+const MUTATE_WEIGHT_STEP: f64 = 0.05;
+const MUTATE_DISABLE: f64 = 0.8;
 
 #[derive(Copy, Clone)]
 pub struct MutationRates {
     crossover: f64,
-    connections: f64,
+    weight: f64,
+    weight_step: f64,
     link: f64,
-    bias: f64,
     node: f64,
-    enable: f64,
-    disable: f64,
-    step: f64
+    disable: f64
 }
 
 impl MutationRates {
     pub fn new() -> MutationRates {
         MutationRates {
             crossover: MUTATE_CROSSOVER,
-            connections: MUTATE_CONNECTIONS,
+            weight: MUTATE_WEIGHT,
+            weight_step: MUTATE_WEIGHT_STEP,
             link: MUTATE_LINK,
-            bias: MUTATE_BIAS,
             node: MUTATE_NODE,
-            enable: MUTATE_ENABLE,
-            disable: MUTATE_DISABLE,
-            step: MUTATE_STEP
+            disable: MUTATE_DISABLE
         }
     }
 }
@@ -120,7 +115,98 @@ impl Genome {
         if Range::new(0f64, 1f64).ind_sample(&mut rng) > self.mutation_rates.crossover {
             let child = self.cross(genome);
         }
-        return self.clone();
+        let mut child = self.clone();
+        child.mutate();
+        return child;
+    }
+
+    pub fn mutate(&mut self) {
+        let mut rng = rand::thread_rng();
+
+        let zero_to_one = Range::new(0f64, 1f64);
+        if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.weight {
+            self.mutate_weight();
+        }
+
+        let zero_to_one = Range::new(0f64, 1f64);
+        if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.link {
+            self.mutate_link();
+        }
+
+        let zero_to_one = Range::new(0f64, 1f64);
+        if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.node {
+            self.mutate_node();
+        }
+    }
+
+    pub fn mutate_weight(&mut self) {
+        let mut rng = rand::thread_rng();
+        let num_genes = Range::new(0usize, self.genes.len());
+        let weight_step = Range::new(-self.mutation_rates.weight_step, self.mutation_rates.weight_step);
+        self.genes[num_genes.ind_sample(&mut rng)].weight *= self.mutation_rates.weight_step;
+    }
+
+    pub fn mutate_link(&mut self) {
+        let mut rng = rand::thread_rng();
+        let neuron_range = Range::new(0u64, self.network.neurons.keys().len() as u64);
+        let mut neuron1 = neuron_range.ind_sample(&mut rng);
+        let mut neuron2 = neuron_range.ind_sample(&mut rng);
+
+        // Both input nodes
+        if neuron1 <= self.num_inputs - 1 && neuron2 <= self.num_inputs - 1 {
+            return;
+        }
+
+        // Only neuron2 is input so swap direction
+        if neuron2 <= self.num_inputs - 1 {
+            let temp = neuron2;
+            neuron2 = neuron1;
+            neuron1 = temp;
+        }
+
+        // Check for existing neuron link
+        for gene in self.genes.iter() {
+            if gene.into == neuron1 && gene.out == neuron2 {
+                return;
+            }
+        }
+
+        let mut gene = Gene {
+            into: neuron1,
+            out: neuron2,
+            //TODO: make random
+            weight: 1.0,
+            enabled: true,
+            innovation: 0
+        };
+
+
+        self.genes.push(gene);
+    }
+
+    pub fn mutate_node(&mut self) {
+        if self.genes.len() == 0 { return; }
+
+        let mut rng = rand::thread_rng();
+        let gene_range = Range::new(0, (self.genes.len() - 1) as usize);
+        let mut gene = self.genes[gene_range.ind_sample(&mut rng)];
+
+        gene.enabled = false;
+
+        let maxneuron = *(self.network.neurons.keys().max().expect("BRAIN DAMAGE"));
+
+        let mut gene1 = gene.clone();
+        gene1.out = maxneuron;
+        gene1.weight = 1.0;
+        unsafe { INNOVATION += 1; gene1.innovation = INNOVATION; }
+        gene1.enabled = true;
+        self.genes.push(gene1);
+
+        let mut gene2 = gene.clone();
+        gene2.into = maxneuron;
+        unsafe { INNOVATION += 1; gene2.innovation = INNOVATION; }
+        gene2.enabled = true;
+        self.genes.push(gene2);
     }
 
     pub fn cross(&self, genome: &Genome) -> Genome {
@@ -141,13 +227,19 @@ impl Genome {
         let mut rng = rand::thread_rng();
         let mut child_genes: Vec<Gene> = Vec::new();
         for gene1 in self.genes.iter() {
-            if let Some(gene2) = innovations.get(&gene1.innovation) {
-                if gene2.enabled && rng.gen() {
-                    child_genes.push(*gene2);
-                    continue;
+            let gene2 = innovations.get(&gene1.innovation).expect("BRAIN DAMAGE");
+            let mut gene = gene1.clone();
+            if rng.gen() {
+                gene = gene2.clone();
+            }
+            gene.enabled = true;
+            if !gene1.enabled || !gene.enabled {
+                let zero_to_one = Range::new(0f64, 1f64);
+                if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.disable {
+                    gene.enabled = false;
                 }
             }
-            child_genes.push(*gene1);
+            child_genes.push(gene);
         }
 
         let network = Network::new(&child_genes, genome1.num_inputs, genome1.num_outputs);
