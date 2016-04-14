@@ -7,8 +7,7 @@ mod tests {
     extern crate env_logger;
 
     extern crate rise;
-    use super::*;
-    use self::rise::neat::{Gene, Genome};
+    use self::rise::neat::genetics::{Gene, Genome};
 
     #[test]
     fn it_works() {

@@ -1,5 +1,7 @@
 pub mod neat;
 
+use neat::genetics::Genome;
+
 #[macro_use]
 extern crate log;
 extern crate nalgebra as na;
@@ -15,7 +17,7 @@ pub struct Actor {
     pub position: Pnt2<f64>,
     pub velocity: Vec2<f64>,
     pub acceleration: Vec2<f64>,
-    genome: neat::Genome
+    genome: Genome
 }
 
 impl Actor {
@@ -27,7 +29,7 @@ impl Actor {
             position: p,
             velocity: v,
             acceleration: a,
-            genome: neat::Genome::random(6, 2)
+            genome: Genome::random(6, 2)
         }
     }
 
@@ -50,8 +52,6 @@ impl Actor {
         self.acceleration = self.acceleration + jerk * SPT;
         self.velocity = self.velocity + self.acceleration * SPT;
         self.position = self.position + self.velocity * SPT;
-
-        println!("Fitness: {}", fitness(&self))
     }
 }
 
