@@ -10,7 +10,7 @@ extern crate time;
 use na::{Vec2, Pnt2, FloatPnt};
 
 pub const TICKS: f64 = 25f64;
-// MilliSeconds Per Tick
+// Seconds Per Tick
 pub const SPT: f64 = 1f64 / TICKS;
 
 pub struct Actor {
