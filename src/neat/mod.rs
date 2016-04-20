@@ -26,6 +26,13 @@ impl Creator {
         for spec in self.species.iter_mut() {
             spec.calc_average_fitness();
             spec.cull();
+        }
+
+        // Remove species with no genomes
+        self.species.retain(|spec| spec.genomes.len() > 0);
+
+        // Elect representatives
+        for spec in self.species.iter_mut() {
             spec.assign_representative();
         }
 
