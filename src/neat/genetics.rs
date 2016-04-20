@@ -112,10 +112,10 @@ impl Genome {
 
     pub fn breed(&self, genome: &Genome) -> Genome {
         let mut rng = rand::thread_rng();
-        if Range::new(0f64, 1f64).ind_sample(&mut rng) > self.mutation_rates.crossover {
-            let child = self.cross(genome);
-        }
         let mut child = self.clone();
+        if Range::new(0f64, 1f64).ind_sample(&mut rng) > self.mutation_rates.crossover {
+            child = self.cross(genome);
+        }
         child.mutate();
         return child;
     }
