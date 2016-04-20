@@ -22,7 +22,7 @@ impl Species {
         let mut g1 = 0;
         let mut g2 = 0;
 
-        while g1 < genome1.genes.len() || g2 < genome2.genes.len() {
+        while g1 < genome1.genes.len() && g2 < genome2.genes.len() {
             let gene1 = genome1.genes[g1];
             let gene2 = genome2.genes[g2];
 
@@ -32,7 +32,7 @@ impl Species {
                 g2 += 1;
             }
 
-            if gene1.innovation > gene2.innovation {
+            else if gene1.innovation > gene2.innovation {
                 if g1 == genome1.genes.len() - 1 {
                     excess.push(gene2.innovation)
                 } else {
@@ -41,7 +41,7 @@ impl Species {
                 g2 += 1;
             }
 
-            if gene2.innovation > gene1.innovation {
+            else if gene2.innovation > gene1.innovation {
                 if g2 == genome2.genes.len() - 1 {
                     excess.push(gene1.innovation)
                 } else {
@@ -66,7 +66,7 @@ impl Species {
     }
 
     pub fn compatible(&self, genome: &Genome) -> bool {
-        Species::difference(&self.representative, &genome) > DIFFERENCE_THRESHOLD
+        Species::difference(&self.representative, &genome) < DIFFERENCE_THRESHOLD
     }
 
     pub fn cull(&mut self) {
