@@ -81,9 +81,10 @@ mod tests {
 
         let species = Species {
             representative: genome1,
-            genomes: Vec::new()
+            genomes: Vec::new(),
+            avg_fitness: 0f64
         };
 
-        assert!(species.compatible(genome2) == true);
+        assert!(species.compatible(&genome2) == true);
     }
 }
