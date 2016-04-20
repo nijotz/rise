@@ -51,6 +51,7 @@ impl Actor {
         inputs.push(self.velocity.y);
         inputs.push(self.acceleration.x);
         inputs.push(self.acceleration.y);
+        inputs.push(1f64);
 
         let outputs = self.genome.network.evaluate(inputs);
         let jerk = Vec2::new(outputs[0], outputs[1]);
@@ -71,7 +72,7 @@ impl World {
     pub fn new() -> World {
         let mut actors = Vec::with_capacity(100);
         for _ in 0..100 {
-            let genome = Genome::random(6, 2);
+            let genome = Genome::random(7, 2);
             let actor = Actor::new(genome);
             actors.push(actor);
         }
