@@ -143,7 +143,7 @@ impl Genome {
         let mut rng = rand::thread_rng();
         let num_genes = Range::new(0usize, self.genes.len());
         let weight_step = Range::new(-self.mutation_rates.weight_step, self.mutation_rates.weight_step);
-        self.genes[num_genes.ind_sample(&mut rng)].weight *= self.mutation_rates.weight_step;
+        self.genes[num_genes.ind_sample(&mut rng)].weight *= weight_step.ind_sample(&mut rng);
     }
 
     pub fn mutate_link(&mut self) {
