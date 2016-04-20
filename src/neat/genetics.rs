@@ -171,7 +171,7 @@ impl Genome {
             }
         }
 
-        let mut gene = Gene {
+        let gene = Gene {
             into: neuron1,
             out: neuron2,
             //TODO: make random
