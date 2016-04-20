@@ -56,7 +56,7 @@ impl MutationRates {
 
 pub struct Genome {
     pub genes: Vec<Gene>,
-    fitness: f64,
+    pub fitness: f64,
     pub network: Network,
     num_inputs: u64,
     num_outputs: u64,

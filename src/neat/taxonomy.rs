@@ -1,13 +1,17 @@
 use neat::genetics::Genome;
+use rand;
+use rand::{thread_rng, Rng};
 
 const EXCESS_COEFF: f64 = 1.0;
 const DISJOINT_COEFF: f64 = 1.0;
 const WEIGHT_COEFF: f64 = 1.0;
 const DIFFERENCE_THRESHOLD: f64 = 1.0;
+const CULL_PERCENTAGE: f64 = 0.5;
 
 pub struct Species {
     pub representative: Genome,
-    pub genomes: Vec<Genome>
+    pub genomes: Vec<Genome>,
+    pub avg_fitness: f64
 }
 
 impl Species {
@@ -61,7 +65,37 @@ impl Species {
             ( WEIGHT_COEFF * weight_diff );
     }
 
-    pub fn compatible(&self, genome: Genome) -> bool {
+    pub fn compatible(&self, genome: &Genome) -> bool {
         Species::difference(&self.representative, &genome) > DIFFERENCE_THRESHOLD
+    }
+
+    pub fn cull(&mut self) {
+        self.genomes.sort_by( |genome1, genome2| genome1.fitness.partial_cmp(&genome2.fitness).unwrap() );
+        let split_idx = self.genomes.len() as f64 * CULL_PERCENTAGE;
+        self.genomes.split_off(split_idx as usize);
+    }
+
+    pub fn add_genome(&mut self, genome: Genome) {
+        self.genomes.push(genome);
+    }
+
+    pub fn breed_child(&self) -> Genome {
+        let mut rng = thread_rng();
+        let child1 = rng.choose(&self.genomes).unwrap();
+        let child2 = rng.choose(&self.genomes).unwrap();
+        return child1.breed(&child2);
+    }
+
+    pub fn assign_representative(&mut self) {
+        self.representative = (*rand::thread_rng().choose(&self.genomes).unwrap()).clone();
+    }
+
+    pub fn calc_average_fitness(&mut self) {
+        let sum = self.genomes.iter().fold(0f64, |acc, genome| acc + genome.fitness);
+        self.avg_fitness = sum / self.genomes.len() as f64;
+    }
+
+    pub fn average_fitness(&self) -> f64 {
+        return self.avg_fitness;
     }
 }
