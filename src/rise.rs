@@ -1,6 +1,7 @@
 pub mod neat;
 
 use neat::genetics::Genome;
+use neat::Creator;
 
 #[macro_use]
 extern crate log;
@@ -9,9 +10,14 @@ extern crate rand;
 extern crate time;
 use na::{Vec2, Pnt2, FloatPnt};
 
-pub const TICKS: f64 = 25f64;
+// Updates per second
+pub const TICKS: u64 = 25u64;
 // Seconds Per Tick
-pub const SPT: f64 = 1f64 / TICKS;
+pub const SPT: f64 = 1f64 / TICKS as f64;
+// Seconds per generation
+pub const SPG: f64 = 10f64;
+// Ticks per generation
+pub const TPG: u64 = (SPG * TICKS as f64) as u64;
 
 pub struct Actor {
     pub position: Pnt2<f64>,
@@ -21,7 +27,7 @@ pub struct Actor {
 }
 
 impl Actor {
-    pub fn new() -> Actor {
+    pub fn new(genome: Genome) -> Actor {
         let p: Pnt2<f64> = Pnt2::new(320f64, 240f64);
         let v: Vec2<f64> = Vec2::new(0f64, 0f64);
         let a: Vec2<f64> = Vec2::new(0f64, 0f64);
@@ -29,7 +35,7 @@ impl Actor {
             position: p,
             velocity: v,
             acceleration: a,
-            genome: Genome::random(6, 2)
+            genome: genome
         }
     }
 
@@ -57,22 +63,57 @@ impl Actor {
 
 pub struct World {
     pub actors: Vec<Actor>,
-    subspace: Vec<Vec<Actor>>
+    pub creator: Creator,
+    pub generation_tick: u64
 }
 
 impl World {
     pub fn new() -> World {
+        let mut actors = Vec::with_capacity(100);
+        for _ in 0..100 {
+            let genome = Genome::random(6, 2);
+            let actor = Actor::new(genome);
+            actors.push(actor);
+        }
+
         World {
-            actors: Vec::new(),
-            subspace: (0..100).map(|_| Vec::new()).collect()
+            actors: actors,
+            creator: Creator::new(),
+            generation_tick: TPG
         }
     }
 
     pub fn update(&mut self) {
+        self.generation_tick -= 1;
+
+        if self.generation_tick <= 0 {
+            self.generation_tick = TPG;
+
+            // Get next generation from current actor genomes
+            let mut next_gen = self.creator.next_generation(
+                self.actors.iter().map(|actor| &actor.genome).collect()
+            );
+
+            // Kill your parents
+            self.actors.clear();
+
+            // Create actors with new genomes
+            for genome in next_gen {
+                let actor = Actor::new(genome);
+                self.actors.push(actor);
+            }
+        }
+
         for actor in self.actors.iter_mut() {
             actor.update();
         }
     }
+
+    //fn actor_genomes(&self) -> Vec<&Genome> {
+    //    let mut genomes = Vec::with_capacity(self.actors.len());
+    //    for actor in self.actors.iter_mut() { genomes.push(&actor.genome); }
+    //    return genomes;
+    //}
 }
 
 fn fitness(actor: &Actor) -> f64 {

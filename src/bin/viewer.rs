@@ -75,11 +75,11 @@ fn main() {
 
     let mut events = window.events();
     while let Some(e) = events.next(&mut window) {
-        if let Some(_button) = e.press_args() {
-            let mut actor = Actor::new();
-            actor.push(Vec2::new(1.0, 1.0));
-            world.actors.push(actor);
-        }
+        //if let Some(_button) = e.press_args() {
+        //    let mut actor = Actor::new();
+        //    actor.push(Vec2::new(1.0, 1.0));
+        //    world.actors.push(actor);
+        //}
 
         if let Some(r) = e.render_args() {
             world.render(&mut gl, &r);
