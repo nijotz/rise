@@ -64,6 +64,7 @@ mod tests {
 
     use self::rise::neat::taxonomy::Species;
 
+    #[test]
     fn it_can_measure_compatibility() {
         let _ = env_logger::init();
 
@@ -73,11 +74,7 @@ mod tests {
             Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
         ], 2, 1);
 
-        let genome2 = Genome::new(vec![
-            Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 1 },
-            Gene{ into: 2, out: 3, weight: 1.0, enabled: true, innovation: 2 },
-            Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
-        ], 2, 1);
+        let genome2 = genome1.clone();
 
         let species = Species {
             representative: genome1,
