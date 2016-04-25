@@ -59,6 +59,7 @@ impl Actor {
         self.acceleration = self.acceleration + jerk * SPT;
         self.velocity = self.velocity + self.acceleration * SPT;
         self.position = self.position + self.velocity * SPT;
+        self.genome.fitness = fitness(&self);
     }
 }
 
