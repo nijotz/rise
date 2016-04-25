@@ -71,3 +71,32 @@ impl Creator {
         self.species.push(spec);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use neat::genetics::{Gene, Genome};
+
+    #[test]
+    fn creator_maintains_population() {
+        let mut genome1 = Genome::new(vec![
+            Gene{ into: 0, out: 3, weight: 1.0, enabled: true, innovation: 1 },
+            Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 2 },
+            Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
+        ], 2, 1);
+
+        let mut genome2 = Genome::new(vec![
+            Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 1 },
+            Gene{ into: 2, out: 3, weight: 1.0, enabled: true, innovation: 2 },
+            Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
+        ], 2, 1);
+
+        genome1.fitness = -2.0;
+        genome2.fitness = -2.0;
+
+        let mut creator = Creator::new();
+        let next_gen = creator.next_generation(vec![&genome1, &genome2]);
+
+        assert!(next_gen.len() == 2);
+    }
+}
