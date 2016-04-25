@@ -5,6 +5,12 @@ pub mod taxonomy;
 use neat::genetics::Genome;
 use neat::taxonomy::Species;
 
+use rand::{SeedableRng, StdRng};
+static RNG_SEED: &'static[usize] = &[294367];
+
+pub fn rng() -> StdRng {
+    SeedableRng::from_seed(RNG_SEED)
+}
 
 pub struct Creator {
     species: Vec<Species>

@@ -1,6 +1,6 @@
+use neat;
 use neat::neurology::Network;
 
-use rand;
 use rand::Rng;
 use rand::distributions::{IndependentSample, Range};
 
@@ -102,7 +102,7 @@ impl Genome {
         let num_genes = Range::new(1u64, 5u64);
         let num_neurons = Range::new(1u64, 7u64);
         let weights = Range::new(-1f64, 1f64);
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
         for i in 0..num_genes.ind_sample(&mut rng) {
             let gene = Gene {
                 into: num_neurons.ind_sample(&mut rng),
@@ -118,7 +118,7 @@ impl Genome {
     }
 
     pub fn breed(&self, genome: &Genome) -> Genome {
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
         let mut child = self.clone();
         if Range::new(0f64, 1f64).ind_sample(&mut rng) > self.mutation_rates.crossover {
             child = self.cross(genome);
@@ -128,7 +128,7 @@ impl Genome {
     }
 
     pub fn mutate(&mut self) {
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
 
         let zero_to_one = Range::new(0f64, 1f64);
         if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.weight {
@@ -147,14 +147,14 @@ impl Genome {
     }
 
     pub fn mutate_weight(&mut self) {
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
         let num_genes = Range::new(0usize, self.genes.len());
         let weight_step = Range::new(-self.mutation_rates.weight_step, self.mutation_rates.weight_step);
         self.genes[num_genes.ind_sample(&mut rng)].weight *= weight_step.ind_sample(&mut rng);
     }
 
     pub fn mutate_link(&mut self) {
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
         let neuron_range = Range::new(0u64, self.network.neurons.keys().len() as u64);
         let mut neuron1 = neuron_range.ind_sample(&mut rng);
         let mut neuron2 = neuron_range.ind_sample(&mut rng);
@@ -194,7 +194,7 @@ impl Genome {
     pub fn mutate_node(&mut self) {
         if self.genes.len() == 0 { return; }
 
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
         let gene_range = Range::new(0, self.genes.len());
         let mut gene = self.genes[gene_range.ind_sample(&mut rng)];
 
@@ -231,7 +231,7 @@ impl Genome {
         }
 
         // Cross genomes
-        let mut rng = rand::thread_rng();
+        let mut rng = neat::rng();
         let mut child_genes: Vec<Gene> = Vec::new();
         for gene1 in genome1.genes.iter() {
             let mut gene = gene1.clone();
@@ -289,7 +289,6 @@ mod tests {
 
     #[test]
     fn genome_breeding_preserves_innovation_ordering() {
-        // TODO: Randomly fails, need a seeded rng in genetics module
         let genome1 = Genome::new(vec![
             Gene{ into: 0, out: 3, weight: 1.0, enabled: true, innovation: 1 },
             Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 2 },

@@ -1,6 +1,7 @@
+use neat;
 use neat::genetics::Genome;
-use rand;
-use rand::{thread_rng, Rng};
+
+use rand::Rng;
 
 const EXCESS_COEFF: f64 = 1.0;
 const DISJOINT_COEFF: f64 = 1.0;
@@ -80,14 +81,14 @@ impl Species {
     }
 
     pub fn breed_child(&self) -> Genome {
-        let mut rng = thread_rng();
+        let mut rng = neat::rng();
         let child1 = rng.choose(&self.genomes).unwrap();
         let child2 = rng.choose(&self.genomes).unwrap();
         return child1.breed(&child2);
     }
 
     pub fn assign_representative(&mut self) {
-        self.representative = (*rand::thread_rng().choose(&self.genomes).unwrap()).clone();
+        self.representative = (*neat::rng().choose(&self.genomes).unwrap()).clone();
     }
 
     pub fn calc_average_fitness(&mut self) {
