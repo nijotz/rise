@@ -210,33 +210,34 @@ impl Genome {
     }
 
     pub fn cross(&self, genome: &Genome) -> Genome {
-        let genome1 = &self;
-        let genome2 = genome;
+        let mut genome1 = self;
+        let mut genome2 = genome;
         if self.fitness < genome.fitness {
-            let genome2 = &self;
-            let genome1 = genome;
+            genome2 = self;
+            genome1 = genome;
         }
 
         // Build innovations hash to match up genes using historical markings
-        let mut innovations: HashMap<u64, Gene> = HashMap::new();
-        for gene in genome.genes.iter() {
-            innovations.insert(gene.innovation, *gene);
+        let mut innovations2: HashMap<u64, Gene> = HashMap::new();
+        for gene in genome2.genes.iter() {
+            innovations2.insert(gene.innovation, *gene);
         }
 
         // Cross genomes
         let mut rng = rand::thread_rng();
         let mut child_genes: Vec<Gene> = Vec::new();
-        for gene1 in self.genes.iter() {
-            let gene2 = innovations.get(&gene1.innovation).expect("BRAIN DAMAGE");
+        for gene1 in genome1.genes.iter() {
             let mut gene = gene1.clone();
-            if rng.gen() {
-                gene = gene2.clone();
-            }
             gene.enabled = true;
-            if !gene1.enabled || !gene.enabled {
-                let zero_to_one = Range::new(0f64, 1f64);
-                if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.disable {
-                    gene.enabled = false;
+            if let Some(gene2) = innovations2.get(&gene1.innovation) {
+                if rng.gen() {
+                    gene = gene2.clone();
+                }
+                if !gene1.enabled || !gene2.enabled {
+                    let zero_to_one = Range::new(0f64, 1f64);
+                    if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.disable {
+                        gene.enabled = false;
+                    }
                 }
             }
             child_genes.push(gene);
