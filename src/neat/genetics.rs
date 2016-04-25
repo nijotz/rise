@@ -195,7 +195,7 @@ impl Genome {
         if self.genes.len() == 0 { return; }
 
         let mut rng = rand::thread_rng();
-        let gene_range = Range::new(0, (self.genes.len() - 1) as usize);
+        let gene_range = Range::new(0, self.genes.len());
         let mut gene = self.genes[gene_range.ind_sample(&mut rng)];
 
         gene.enabled = false;
