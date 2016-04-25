@@ -45,8 +45,8 @@ impl Actor {
 
     pub fn update(&mut self) {
         let mut inputs = Vec::new();
-        inputs.push(self.position.x);
-        inputs.push(self.position.y);
+        inputs.push(self.position.x / 320f64);
+        inputs.push(self.position.y / 240f64);
         inputs.push(self.velocity.x);
         inputs.push(self.velocity.y);
         inputs.push(self.acceleration.x);
