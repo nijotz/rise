@@ -41,9 +41,11 @@ impl Creator {
         let mut offspring: Vec<Genome> = Vec::with_capacity(num_offspring);
         let total_avg_fitness = self.species.iter().fold(0f64, |acc, s| s.average_fitness() + acc);
         for spec in self.species.iter() {
-            let num_spec_offspring =
-                (spec.average_fitness() / total_avg_fitness * num_offspring as f64) as usize;
-            offspring.push(spec.breed_child());
+            let fitness_percentage = spec.average_fitness() / total_avg_fitness;
+            let num_spec_offspring = fitness_percentage * num_offspring as f64;
+            for _ in 0..(num_spec_offspring as usize) {
+                offspring.push(spec.breed_child());
+            }
         }
 
         return offspring;

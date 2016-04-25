@@ -189,3 +189,38 @@ impl Network {
         return outputs;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use neat::genetics::{Gene, Genome};
+
+    #[test]
+    fn networks_evaluate() {
+        let genome = Genome::new(vec![
+            Gene{ into: 0, out: 3, weight: 1.0, enabled: true, innovation: 1 },
+            Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 2 },
+            Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
+        ], 2, 1);
+
+        let inputs = vec![1f64, 1f64];
+        let outputs = genome.network.evaluate(inputs);
+
+        assert!(outputs.len() == 1);
+        assert!(outputs[0] >= 0f64 && outputs[0] <= 1f64);
+    }
+
+    #[test]
+    fn networks_handles_circular_dependencies() {
+        let genome = Genome::new(vec![
+            Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 1 },
+            Gene{ into: 2, out: 3, weight: 1.0, enabled: true, innovation: 2 },
+            Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
+        ], 2, 1);
+
+        let inputs = vec![1f64, 1f64];
+        let outputs = genome.network.evaluate(inputs);
+
+        assert!(outputs.len() == 1);
+        assert!(outputs[0] >= 0f64 && outputs[0] <= 1f64);
+    }
+}

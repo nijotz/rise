@@ -91,7 +91,7 @@ impl World {
             self.generation_tick = TPG;
 
             // Get next generation from current actor genomes
-            let mut next_gen = self.creator.next_generation(
+            let next_gen = self.creator.next_generation(
                 self.actors.iter().map(|actor| &actor.genome).collect()
             );
 
@@ -109,12 +109,6 @@ impl World {
             actor.update();
         }
     }
-
-    //fn actor_genomes(&self) -> Vec<&Genome> {
-    //    let mut genomes = Vec::with_capacity(self.actors.len());
-    //    for actor in self.actors.iter_mut() { genomes.push(&actor.genome); }
-    //    return genomes;
-    //}
 }
 
 fn fitness(actor: &Actor) -> f64 {

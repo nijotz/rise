@@ -99,3 +99,28 @@ impl Species {
         return self.avg_fitness;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use neat::genetics::{Gene, Genome};
+
+    #[test]
+    fn species_can_measure_compatibility() {
+        let genome1 = Genome::new(vec![
+            Gene{ into: 0, out: 3, weight: 1.0, enabled: true, innovation: 1 },
+            Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 2 },
+            Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 3 }
+        ], 2, 1);
+
+        let genome2 = genome1.clone();
+
+        let species = Species {
+            representative: genome1,
+            genomes: Vec::new(),
+            avg_fitness: 0f64
+        };
+
+        assert!(species.compatible(&genome2) == true);
+    }
+}
