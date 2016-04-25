@@ -70,7 +70,7 @@ impl Species {
     }
 
     pub fn cull(&mut self) {
-        self.genomes.sort_by( |genome1, genome2| genome1.fitness.partial_cmp(&genome2.fitness).unwrap() );
+        self.genomes.sort_by( |genome1, genome2| genome1.fitness.partial_cmp(&genome2.fitness).unwrap().reverse() );
         let split_idx = self.genomes.len() as f64 * CULL_PERCENTAGE;
         self.genomes.split_off(split_idx as usize);
     }

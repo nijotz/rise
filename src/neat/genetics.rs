@@ -18,8 +18,8 @@ pub struct Gene {
 
 impl fmt::Debug for Gene {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Gene: {{ into: {}, out: {}, weight: {} }}",
-               self.into, self.out, self.weight)
+        write!(f, "{{ I:{:02}, {} => {}, W:{:.2} ON:{} }}",
+               self.innovation, self.into, self.out, self.weight, self.enabled)
     }
 }
 static mut INNOVATION: u64 = 0;
@@ -61,6 +61,13 @@ pub struct Genome {
     num_inputs: u64,
     num_outputs: u64,
     mutation_rates: MutationRates,
+}
+
+impl fmt::Debug for Genome {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Genome: {:?}, Fitness: {}",
+               self.genes, self.fitness)
+    }
 }
 
 impl Genome {

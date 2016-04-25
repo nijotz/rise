@@ -17,6 +17,9 @@ impl Creator {
         }
     }
     pub fn next_generation(&mut self, genomes: Vec<&Genome>) -> Vec<Genome> {
+        info!("Best fitness: {:?}", genomes.iter().fold(genomes[0],
+            |a, b| if a.fitness > b.fitness { a } else { b } ));
+
         // Classify genomes
         for genome in genomes.iter() {
             self.add_genome((*genome).clone());
@@ -48,6 +51,7 @@ impl Creator {
             }
         }
 
+        info!("Next generation has {} species", self.species.len());
         return offspring;
     }
 
