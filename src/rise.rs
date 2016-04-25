@@ -113,5 +113,5 @@ impl World {
 }
 
 fn fitness(actor: &Actor) -> f64 {
-    -actor.position.dist(&Pnt2::new(0f64, 0f64))
+    actor.position.dist(&Pnt2::new(320f64, 240f64)) + 1f64 / actor.position.dist(&Pnt2::new(0f64, 0f64))
 }
