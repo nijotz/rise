@@ -307,7 +307,9 @@ mod tests {
     }
 
     #[test]
-    fn genome_breeding_preserves_innovation_ordering() {
+    fn genome_crossover_preserves_innovation_ordering() {
+        let _ = env_logger::init();
+        unsafe { super::INNOVATION = 6 }
         let genome1 = Genome::new(vec![
             Gene{ into: 0, out: 3, weight: 1.0, enabled: true, innovation: 1 },
             Gene{ into: 1, out: 3, weight: 1.0, enabled: true, innovation: 2 },
@@ -320,8 +322,8 @@ mod tests {
             Gene{ into: 3, out: 2, weight: 1.0, enabled: true, innovation: 6 }
         ], 2, 1);
 
-        let child = genome1.breed(&genome2);
-        println!("Child: {:?}", child);
+        let child = genome1.cross(&genome2);
+
         let mut ordered = true;
         let mut innovation: u64 = 0;
         for gene in child.genes.iter() {
