@@ -22,7 +22,13 @@ impl fmt::Debug for Gene {
                self.innovation, self.into, self.out, self.weight, self.enabled)
     }
 }
+
 static mut INNOVATION: u64 = 0;
+
+unsafe fn innovation_next() -> u64 {
+    INNOVATION += 1;
+    return INNOVATION;
+}
 
 const MUTATE_CROSSOVER: f64 = 0.75;
 const MUTATE_WEIGHT: f64 = 0.05;
@@ -205,13 +211,13 @@ impl Genome {
         let mut gene1 = gene.clone();
         gene1.out = maxneuron;
         gene1.weight = 1.0;
-        unsafe { INNOVATION += 1; gene1.innovation = INNOVATION; }
+        unsafe { gene1.innovation = innovation_next(); }
         gene1.enabled = true;
         self.genes.push(gene1);
 
         let mut gene2 = gene.clone();
         gene2.into = maxneuron;
-        unsafe { INNOVATION += 1; gene2.innovation = INNOVATION; }
+        unsafe { gene2.innovation = innovation_next(); }
         gene2.enabled = true;
         self.genes.push(gene2);
     }
