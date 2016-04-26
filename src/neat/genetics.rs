@@ -194,6 +194,9 @@ impl Genome {
             }
         }
 
+        // Doesn't point to self
+        if neuron1 == neuron2 { return; }
+
         let innovation;
         unsafe { innovation = innovation_next(); }
         let gene = Gene {
