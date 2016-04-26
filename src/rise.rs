@@ -45,8 +45,8 @@ impl Actor {
 
     pub fn update(&mut self) {
         let mut inputs = Vec::new();
-        inputs.push(self.position.x / 320f64);
-        inputs.push(self.position.y / 240f64);
+        inputs.push(self.position.x / 320f64 - 0.5f64);
+        inputs.push(self.position.y / 240f64 - 0.5f64);
         inputs.push(self.velocity.x);
         inputs.push(self.velocity.y);
         inputs.push(self.acceleration.x);
@@ -113,5 +113,5 @@ impl World {
 }
 
 fn fitness(actor: &Actor) -> f64 {
-    actor.position.dist(&Pnt2::new(320f64, 240f64)) + 1f64 / actor.position.dist(&Pnt2::new(0f64, 0f64))
+    -actor.position.dist(&Pnt2::new(0f64, 0f64))
 }

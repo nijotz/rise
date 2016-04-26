@@ -211,11 +211,14 @@ impl Genome {
 
         let innovation;
         unsafe { innovation = innovation_next(); }
+
+        let zero_to_one = Range::new(0f64, 1f64);
+        let weight = zero_to_one.ind_sample(&mut rng) * 2f64 - 1f64;
+
         let gene = Gene {
             into: neuron1,
             out: neuron2,
-            //TODO: make random
-            weight: 1.0,
+            weight: weight,
             enabled: true,
             innovation: innovation
         };
