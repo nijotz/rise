@@ -5,11 +5,18 @@ pub mod taxonomy;
 use neat::genetics::Genome;
 use neat::taxonomy::Species;
 
-use rand::{SeedableRng, StdRng};
+use rand;
+use rand::{SeedableRng, StdRng, ThreadRng};
 static RNG_SEED: &'static[usize] = &[294367];
 
+#[cfg(test)]
 pub fn rng() -> StdRng {
     SeedableRng::from_seed(RNG_SEED)
+}
+
+#[cfg(not(test))]
+pub fn rng() -> ThreadRng {
+    rand::thread_rng()
 }
 
 pub struct Creator {
