@@ -194,17 +194,20 @@ impl Genome {
             }
         }
 
+        let innovation;
+        unsafe { innovation = innovation_next(); }
         let gene = Gene {
             into: neuron1,
             out: neuron2,
             //TODO: make random
             weight: 1.0,
             enabled: true,
-            innovation: 0
+            innovation: innovation
         };
 
         debug!("Mutating new link: {} -> {}", neuron1, neuron2);
         self.genes.push(gene);
+
     }
 
     pub fn mutate_node(&mut self) {
