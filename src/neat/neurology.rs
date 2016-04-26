@@ -49,6 +49,8 @@ pub struct Network {
 
 impl Network {
     pub fn new(genes: &Vec<Gene>, num_inputs: u64, num_outputs: u64) -> Network {
+        debug!("Creating new Network");
+
         let mut neurons: HashMap<u64, Neuron> = HashMap::new();
 
         // Add inputs and outputs to network

@@ -124,11 +124,15 @@ impl Genome {
     }
 
     pub fn breed(&self, genome: &Genome) -> Genome {
-        let mut rng = neat::rng();
+        debug!("Breeding genomes");
         let mut child = self.clone();
+
+        let mut rng = neat::rng();
         if Range::new(0f64, 1f64).ind_sample(&mut rng) > self.mutation_rates.crossover {
+            debug!("Crossing genomes");
             child = self.cross(genome);
         }
+
         child.mutate();
         return child;
     }
@@ -155,8 +159,14 @@ impl Genome {
     pub fn mutate_weight(&mut self) {
         let mut rng = neat::rng();
         let num_genes = Range::new(0usize, self.genes.len());
-        let weight_step = Range::new(-self.mutation_rates.weight_step, self.mutation_rates.weight_step);
-        self.genes[num_genes.ind_sample(&mut rng)].weight *= weight_step.ind_sample(&mut rng);
+        let weight_step_range = Range::new(
+            -self.mutation_rates.weight_step,
+            self.mutation_rates.weight_step);
+        let gene = num_genes.ind_sample(&mut rng);
+        let weight_step = weight_step_range.ind_sample(&mut rng) + 1f64;
+
+        debug!("Mutating weight of gene #{} by {:.2}%", gene, weight_step);
+        self.genes[gene].weight *= weight_step;
     }
 
     pub fn mutate_link(&mut self) {
@@ -193,7 +203,7 @@ impl Genome {
             innovation: 0
         };
 
-
+        debug!("Mutating new link: {} -> {}", neuron1, neuron2);
         self.genes.push(gene);
     }
 
@@ -207,6 +217,7 @@ impl Genome {
         gene.enabled = false;
 
         let maxneuron = *(self.network.neurons.keys().max().expect("BRAIN DAMAGE"));
+        debug!("Mutating new node between {} -> {}", gene.into, gene.out);
 
         let mut gene1 = gene.clone();
         gene1.out = maxneuron;
@@ -272,6 +283,8 @@ impl Genome {
 
 #[cfg(test)]
 mod tests {
+    extern crate env_logger;
+
     use super::*;
 
     #[test]
