@@ -32,15 +32,17 @@ unsafe fn innovation_next() -> u64 {
 
 const MUTATE_CROSSOVER: f64 = 0.75;
 const MUTATE_WEIGHT: f64 = 0.05;
+const MUTATE_WEIGHT_NEW: f64 = 0.10;
+const MUTATE_WEIGHT_STEP: f64 = 0.05;
 const MUTATE_LINK: f64 = 0.05;
 const MUTATE_NODE: f64 = 0.05;
-const MUTATE_WEIGHT_STEP: f64 = 0.05;
 const MUTATE_DISABLE: f64 = 0.8;
 
 #[derive(Copy, Clone)]
 pub struct MutationRates {
     crossover: f64,
     weight: f64,
+    weight_new: f64,
     weight_step: f64,
     link: f64,
     node: f64,
@@ -52,6 +54,7 @@ impl MutationRates {
         MutationRates {
             crossover: MUTATE_CROSSOVER,
             weight: MUTATE_WEIGHT,
+            weight_new: MUTATE_WEIGHT_NEW,
             weight_step: MUTATE_WEIGHT_STEP,
             link: MUTATE_LINK,
             node: MUTATE_NODE,
@@ -158,15 +161,24 @@ impl Genome {
 
     pub fn mutate_weight(&mut self) {
         let mut rng = neat::rng();
-        let num_genes = Range::new(0usize, self.genes.len());
-        let weight_step_range = Range::new(
-            -self.mutation_rates.weight_step,
-            self.mutation_rates.weight_step);
-        let gene = num_genes.ind_sample(&mut rng);
-        let weight_step = weight_step_range.ind_sample(&mut rng) + 1f64;
 
-        debug!("Mutating weight of gene #{} by {:.2}%", gene, weight_step);
-        self.genes[gene].weight *= weight_step;
+        let num_genes = Range::new(0usize, self.genes.len());
+        let gene = num_genes.ind_sample(&mut rng);
+
+        let zero_to_one = Range::new(0f64, 1f64);
+        if zero_to_one.ind_sample(&mut rng) < self.mutation_rates.weight_new {
+            let new_weight = zero_to_one.ind_sample(&mut rng) * 2f64 - 1f64;
+            debug!("Mutating weight of gene #{} to {}", gene, new_weight);
+            self.genes[gene].weight = new_weight;
+        } else {
+            let weight_step_range = Range::new(
+                -self.mutation_rates.weight_step,
+                self.mutation_rates.weight_step);
+            let weight_step = weight_step_range.ind_sample(&mut rng) + 1f64;
+
+            debug!("Mutating weight of gene #{} by {:.2}%", gene, weight_step);
+            self.genes[gene].weight *= weight_step;
+        }
     }
 
     pub fn mutate_link(&mut self) {
